@@ -21,7 +21,7 @@ class EmployeeBase(BaseModel):
     salary: Decimal = Field(gt=0)
     joining_date: date
     employment_status: str = "active"
-    manager_name: str | None = None
+    manager_name: str = Field(min_length=1, max_length=200)
 
 
 class EmployeeCreate(EmployeeBase):

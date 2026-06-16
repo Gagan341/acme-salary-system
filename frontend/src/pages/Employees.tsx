@@ -31,6 +31,7 @@ import {
 } from "../hooks/useEmployees";
 import EmployeeFormDialog from "../components/EmployeeFormDialog";
 import ConfirmDialog from "../components/ConfirmDialog";
+import { formatApiError } from "../services/api";
 import { local } from "../services/format";
 import type { Employee, EmployeeInput } from "../types";
 
@@ -149,12 +150,7 @@ export default function Employees() {
 
   const submit = (payload: EmployeeInput) => {
     setFormError(null);
-    const onError = (e: unknown) => {
-      const msg =
-        (e as { response?: { data?: { detail?: string } } })?.response?.data
-          ?.detail ?? "Something went wrong.";
-      setFormError(msg);
-    };
+    const onError = (e: unknown) => setFormError(formatApiError(e));
     if (editing) {
       update.mutate(
         { id: editing.id, payload },

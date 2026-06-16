@@ -17,6 +17,31 @@ const baseURL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
 
 export const http = axios.create({ baseURL, timeout: 30000 });
 
+/** Turn FastAPI/axios errors into a readable message for the UI. */
+export function formatApiError(error: unknown): string {
+  const detail = (error as { response?: { data?: { detail?: unknown } } })?.response
+    ?.data?.detail;
+
+  if (typeof detail === "string") return detail;
+
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) => {
+        if (typeof item === "object" && item && "msg" in item) {
+          const loc = "loc" in item && Array.isArray(item.loc)
+            ? item.loc.filter((p) => p !== "body").join(" ")
+            : "";
+          const msg = String((item as { msg: string }).msg);
+          return loc ? `${loc}: ${msg}` : msg;
+        }
+        return String(item);
+      })
+      .join(". ");
+  }
+
+  return "Something went wrong. Please check all fields and try again.";
+}
+
 // ---- employees -----------------------------------------------------------
 export async function listEmployees(q: EmployeeQuery): Promise<Page<Employee>> {
   const params: Record<string, unknown> = {
